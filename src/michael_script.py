@@ -14,15 +14,20 @@ from loss_model import rmsle
 random_state =100
 
 
-df = pd.read_csv('../data/train.csv')
+df = pd.read_csv('../data/train.csv', low_memory=False)
 
+df['UsageBand'].fillna('other', inplace=True)
+df = pd.concat([df.drop('UsageBand', axis=1), pd.get_dummies(df['UsageBand'], prefix='UsageBand')], axis=1)
 
 y = df.pop('SalePrice')
-X = df[['YearMade']]
+X = df[['YearMade',
+        'UsageBand_High',
+        'UsageBand_Medium',
+        'UsageBand_Low']]
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, random_state=random_state)
+X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True)
 n_folds=10
-kf = KFold(n_splits=n_folds, random_state=random_state)
+kf = KFold(n_splits=n_folds)
 
 errors = []
 
