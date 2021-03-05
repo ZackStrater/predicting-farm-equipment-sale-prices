@@ -11,18 +11,24 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from loss_model import rmsle
-random_state =100
+random_state = 100
 
 
 df = pd.read_csv('../data/train.csv')
-
-
+# median_year = df['YearMade'].median()
+# df['YearMade'].replace(1000, int(median_year), inplace=True)
+df['auctioneerID'].fillna(1000, inplace=True)
+auction_id_mean = df.groupby('auctioneerID')['SalePrice'].mean().to_dict()
+df['auctioneer_value'] = df['auctioneerID'].map(auction_id_mean)
+print(df.isnull().sum())
 y = df.pop('SalePrice')
-X = df[['YearMade']]
+X = df[['YearMade',
+        'auctioneer_value']]
+
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, random_state=random_state)
 n_folds=10
-kf = KFold(n_splits=n_folds, random_state=random_state)
+kf = KFold(n_splits=n_folds)
 
 errors = []
 
